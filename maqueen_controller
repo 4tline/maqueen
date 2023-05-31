@@ -1,0 +1,19 @@
+radio.set_group(15)#definit le groupe radio de communication
+radio.set_transmit_power(7)#definit la puissance de transmition
+
+def on_forever():#debout de la boucle 
+    if input.button_is_pressed(Button.A)== True:#envoie 1 lorsque le boutton a est pressé,ce qui fait avancer le robot
+        radio.send_number(1)
+    elif input.button_is_pressed(Button.B)==True:#envoie 2  lorsque le boutton b est pressé , ce qui fait reculer le robot 
+        radio.send_number(2)
+    elif input.is_gesture(Gesture.TILT_LEFT)==True:# envoie 4 lorsque la carte est penché a gauce ce qui fait tourner a gauche 
+        radio.send_number(4)
+    elif input.is_gesture(Gesture.TILT_RIGHT)==True:#envoie 3 lorsque la carte est pecnhé a doite ca fait tourner le robot a droite
+        radio.send_number(3)
+    else:
+        radio.send_number(0)
+    def on_button_pressed_ab():#si les deux boutton sont prssé en meme temps  cela envoie un message controllant la pince pour l'ouvrir et la fermé. 
+        radio.send_number(5)
+        radio.send_message(radio.__message(0))
+    input.on_button_pressed(Button.AB, on_button_pressed_ab)
+basic.forever(on_forever)#fin de la boucle
