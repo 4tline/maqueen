@@ -1,0 +1,60 @@
+radio.set_group(15)#definit un groipe radio pour la communication
+radio.set_transmit_power(7)#definit la portée
+stat=0#etat contenant le valeur int du paquet contenu
+pince = False #definit le statut booléen de la pince True pour ouvert,False pour fermé.
+
+def on_received_number(receivedNumber):#fonction permettnt d'associé le dernier paquet recu a la valeur stat
+    global stat
+    stat =receivedNumber
+radio.on_received_number(on_received_number)
+
+def pince_ferme():#fonction pour fermer la pince
+    maqueen.servo_run(maqueen.Servos.S1, 90)
+    basic.show_leds("""
+    . # # # .
+    . # # # .
+    . # # # .
+    . # # # .
+    . . # . .
+    """)
+
+def pince_ouverte():                                        #fonction pour ouvrir la pince
+    maqueen.servo_run(maqueen.Servos.S1, 30)
+    basic.show_leds("""
+        # # . # #
+        # . . . #
+        # . . . #
+        # # . # #
+        . # # # .
+            """)
+
+def on_forever():#boucle principale
+    if stat ==0:#arrete les moteurs 
+        maqueen.motor_stop(maqueen.Motors.ALL)
+    elif radio.received_number()==1:#comparateur avec le statut pour avancer
+        maqueen.motor_run(maqueen.Motors.ALL, maqueen.Dir.CW, 255)
+    elif stat==2:#coparateur pour faire reculer le robot
+        maqueen.motor_run(maqueen.Motors.ALL, maqueen.Dir.CCW, 255)
+    elif stat==3:#comparateur pour faire aller a droite le robot
+        maqueen.motor_run(maqueen.Motors.M2, maqueen.Dir.CCW, 32)
+        maqueen.motor_run(maqueen.Motors.M1, maqueen.Dir.CW, 32)
+    elif stat==4:#comparateur pour faire tourner le robot a gauche
+        maqueen.motor_run(maqueen.Motors.M2, maqueen.Dir.CW, 32)
+        maqueen.motor_run(maqueen.Motors.M1, maqueen.Dir.CCW, 32)
+
+    else:#en cas de paquet nul le robot s'arrete
+        maqueen.motor_stop(maqueen.Motors.ALL)
+    
+    def on_received_message():#fonction pour controller la pince
+        global pince
+        if pince == False:#fonction qui verfifie l'etat de la pince pour savoir quelle commande executer ouvrir ou fermer
+            pince_ouverte()
+            pince = True
+        else:
+            pince_ferme()
+            pince = False
+    radio.on_received_message(0, on_received_message)
+    basic.show_number(stat)#montre le paquet recu
+
+
+basic.forever(on_forever)#fin de la boucle pour qu'elle se relance
